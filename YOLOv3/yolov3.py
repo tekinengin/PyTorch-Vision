@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 from util import *
 
-
 class EmptyLayer(nn.Module):
     def __init__(self):
         super(EmptyLayer, self).__init__()
@@ -93,12 +92,12 @@ def create_modules(blocks):
 
         elif block["type"] == "route":
 
-            layers = block["layers"].split(',')
+            block["layers"] = block["layers"].split(',')
 
-            start = int(layers[0])
+            start = int(block["layers"][0])
 
             try:
-                end = int(layers[1])
+                end = int(block["layers"][1])
             except:
                 end = 0
 
@@ -138,15 +137,14 @@ def create_modules(blocks):
         
     return net_info, module_list
 
-
 class YOLOv3(nn.Module):
     def __init__(self, cfgfile):
         super(YOLOv3, self).__init__()
         self.blocks = parse_cfg(cfgfile)
         self.net_info, self.module_list = create_modules(self.blocks)
         
-        
     def forward(self, x, isCUDA):
+        if isCUDA: x = x.to("cuda")
         modules = self.blocks[1:]
         outputs = {}
         
@@ -201,4 +199,6 @@ class YOLOv3(nn.Module):
             outputs[i] = x
             
         return detections
-        
+
+
+
